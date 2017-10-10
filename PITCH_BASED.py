@@ -4,6 +4,14 @@
 Created on Tue Sep 26 09:16:34 2017
 IN This feature extractor,we using Hanming window before FFT,and we
 chose the hanming window-length the same as the frame window length
+what pitch-based feature contains:
+pitch-period and harmonics-to-noise ratio.
+pitch-period is inversion of pitch(HZ)
+harmonics-to-noise is defined as follow:
+HNR(m) = 10*log(ACF(x)/(ACF(0)-ACF(x))
+m:  this singal, is a frame singal here.
+x:  at pitch-period time,in this frame signal.
+0:  at zero time,meaning the start time of this frame singal. 
 @author: lemn
 """
 
@@ -75,20 +83,14 @@ def _delta_featrue_funciton(features):
 def _extractor(filename,window_length,hop_length):
     y,fs = librosa.load(filename,sr=None)
     fs=int(fs)
-    #n_frames_floor = np.floor(y.size/frame_windows)
-    #n_frames = int(np.round(y.size/window_length))
-    
     pitch_based_features=[]
+    
+    #these three lines below are what librosa.mfcc use to frame the signal.use the same method to make sure the same frame numbers. 
     librosa.util.valid_audio(y)
     y = np.pad(y, int(window_length // 2), mode='reflect')  
     y_frames = librosa.util.frame(y,frame_length=window_length,hop_length=hop_length)
+    
     for samples_in_window in y_frames.T:
-#        window_start = window_length*i
-#        window_end = window_start+window_length
-#        if window_end>y.size:
-#            window_end = y.size
-#            window_start = y.size-window_length
-#       samples_in_window = y[window_start:window_end]
         ceps = _cepstrum(samples_in_window,window_length,hop_length)
         pitch_period = _pitch_period_detection(ceps,fs)
         t = int(fs*pitch_period)
