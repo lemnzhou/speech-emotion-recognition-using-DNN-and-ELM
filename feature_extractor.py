@@ -55,21 +55,21 @@ def save_features(features,save_file):
             if line_str ==None:
                 line_str = ' '.join([str(features[k,m]) for m in range(np.shape(features)[1])])
             else:
-                line_str = line_str + ' '.join([str(features[k,m]) for m in range(np.shape(features)[1])])
+                line_str = line_str +' '+ ' '.join([str(features[k,m]) for m in range(np.shape(features)[1])])
         line_str +='\n'
         f.write(line_str)
     f.close()
 
 #check those feature with nan or inf,and then prune them
-def check_feature(feature_file):
-    f = open(feature_file)
-    readlines = f.readlines()
-    f.close()
-    for line in readlines:
-        line = line.strip().split(' ')
-        if 'inf' in line or 'nan' in line:
-            return False
-    return True
+#def check_feature(feature_file):
+#    f = open(feature_file)
+#    readlines = f.readlines()
+#    f.close()
+#    for line in readlines:
+#        line = line.strip().split(' ')
+#        if 'inf' in line or 'nan' in line:
+#            return False
+#    return True
     
 def feature_get(input_files_list,feature_save_list):
     '''
@@ -86,7 +86,7 @@ def feature_get(input_files_list,feature_save_list):
     i = 0
     n = len(input_audio_files)
     j = int(n/3)
-    tmp_features1 = []
+    tmp_features1 = none
     tmp_features2 = []
     tmp_savefilename = []
     means = None
@@ -100,7 +100,10 @@ def feature_get(input_files_list,feature_save_list):
         feature2 = pitch_based._extractor(audio_file,window_length = 200,hop_length = 80)
         features = combine_feature([feature1,feature2])
         if i<=j:
-            tmp_features1.extend(features)
+            if i==0:
+                tmp_features1 = features
+            else:
+                tmp_features1 = np.vstack([tmp_features1,features])
             tmp_features2.append(features)
             tmp_savefilename.append(save_file)
             if i==j:
@@ -120,8 +123,8 @@ def feature_get(input_files_list,feature_save_list):
             save_features(features,save_file)
         i = i+1
         #print(i)
-        if not check_feature(save_file):
-            print(save_file)
+        #if not check_feature(save_file):
+           # print(save_file)
 
     
 if __name__=='__main__':
