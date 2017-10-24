@@ -79,7 +79,26 @@ def _delta_featrue_funciton(features):
     delta = librosa.feature.delta(features)
     delta = np.vstack((features,delta))
     return delta
-        
+
+
+def highest_energy_marks(filename,window_length,hop_length,ratio = 0.2):
+    y,fs = librosa.load(filename,sr=None)
+    librosa.util.valid_audio(y)
+    y = np.pad(y, int(window_length // 2), mode='reflect')  
+    y_frames = librosa.util.frame(y,frame_length=window_length,hop_length=hop_length)
+    energys = []
+    y_frames = y_frames.T
+    for frame in y_frames:
+        a = fft(frame)
+        b = np.abs(a)
+        energys.append(np.sum(b))
+    sortedId = np.argsort(energys)
+    i = int(len(sortedId)*(1-ratio))
+    marks =np.zeros(len(energys))
+    for j in range(i,len(sortedId)):
+        marks[sortedId[j]]=1
+    return marks
+    
 def _extractor(filename,window_length,hop_length):
     y,fs = librosa.load(filename,sr=None)
     fs=int(fs)
@@ -99,10 +118,10 @@ def _extractor(filename,window_length,hop_length):
         pitch_based_features.append(feature)
     ret_features = _delta_featrue_funciton(np.matrix(pitch_based_features).T)
     return ret_features.T
-
     
 if __name__ == '__main__':
     filename = '/home/lemn/experiment/data/iemocap/wav/Ses01F_impro01_F000.wav'
     window_length = 200
     hop_length = 80
+    marks = highest_energy_marks(filename,window_length,hop_length)
     pitch_based_features=_extractor(filename,window_length,hop_length)
