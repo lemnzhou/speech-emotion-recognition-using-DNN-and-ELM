@@ -30,11 +30,23 @@ def feature_noralization(feature_file_list):
     readlines = f.readlines()
     f.close()
     n = len(readlines)
-    f = open('/home/lemn/experiment/code/feature/iemocap/mean_std_variance')
-    means = f.readline().strip()
-    means = [np.float64(x) for x in means.split(' ')]
-    std_variances = f.readline().strip()
-    std_variances = [np.float64(x) for x in std_variances.split(' ')]
+    j = int(n/3)
+    features = []
+    for i in range(j):
+        filename = readlines[i].strip()
+        f = open(filename)
+        feas = f.readlines()
+        f.close()
+        for fea in feas:
+            fea=fea.strip().split(' ')
+            a = [np.float64(x) for x in fea]
+            features.append(a)
+    [means,std_variances] = get_mean_and_standard_variance(features)
+    #f = open('/home/lemn/experiment/code/feature/iemocap/mean_std_variance')
+    #means = f.readline().strip()
+    #means = [np.float64(x) for x in means.split(' ')]
+    #std_variances = f.readline().strip()
+    #std_variances = [np.float64(x) for x in std_variances.split(' ')]
     for i in range(n):
         filename = readlines[i].strip()
         print(filename)
